@@ -1,5 +1,10 @@
 # Interview Prep Tracker
 
+![CI](https://github.com/SaharHalili95/interview-prep-tracker/actions/workflows/ci.yml/badge.svg)
+![Python](https://img.shields.io/badge/python-3.8+-blue.svg)
+![TypeScript](https://img.shields.io/badge/typescript-5.0+-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+
 A full-stack application to track coding interview questions and preparation progress.
 
 ## Tech Stack
@@ -53,3 +58,28 @@ Frontend runs on `http://localhost:5173`
 - Track progress with dashboard statistics
 - Link to LeetCode problems
 - Save solutions and notes
+
+## Docker
+
+Run the entire application with Docker:
+
+```bash
+docker-compose up --build
+```
+
+This will start:
+- Backend API at `http://localhost:8000`
+- Frontend at `http://localhost:5173`
+- MongoDB at `localhost:27017`
+
+## Testing
+
+```bash
+cd backend
+pip install -r requirements.txt
+pytest tests/ -v
+```
+
+## License
+
+MIT

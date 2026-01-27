@@ -1,3 +1,6 @@
+from contextlib import asynccontextmanager
+import logging
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from bson import ObjectId
@@ -7,7 +10,29 @@ from datetime import datetime
 from models import Question, QuestionUpdate, Status
 from database import questions_collection
 
-app = FastAPI(title="Interview Prep Tracker API")
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan handler for startup and shutdown events."""
+    # Startup
+    logger.info("Interview Prep Tracker API starting...")
+    logger.info("Connected to MongoDB")
+    yield
+    # Shutdown
+    logger.info("Application shutting down...")
+
+
+app = FastAPI(
+    title="Interview Prep Tracker API",
+    lifespan=lifespan
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,7 +43,7 @@ app.add_middleware(
 )
 
 
-def question_helper(question) -> dict:
+def question_helper(question: dict) -> dict:
     return {
         "id": str(question["_id"]),
         "title": question["title"],
