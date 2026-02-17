@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../services/api'
 import { Question, Difficulty, Status } from '../types/Question'
@@ -9,6 +9,7 @@ export default function Questions() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [difficultyFilter, setDifficultyFilter] = useState<string>('all')
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -46,16 +47,19 @@ export default function Questions() {
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this question?')) {
+      setDeletingId(id)
       try {
         await api.deleteQuestion(id)
         loadQuestions()
       } catch (error) {
         console.error('Failed to delete question:', error)
+      } finally {
+        setDeletingId(null)
       }
     }
   }
 
-  const categories = Array.from(new Set(questions.map(q => q.category)))
+  const categories = useMemo(() => Array.from(new Set(questions.map(q => q.category))), [questions])
 
   const getDifficultyColor = (difficulty: Difficulty) => {
     switch (difficulty) {
@@ -145,7 +149,13 @@ export default function Questions() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredQuestions.map((question) => (
+            {filteredQuestions.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                  No questions found. Try adjusting your filters or add a new question.
+                </td>
+              </tr>
+            ) : filteredQuestions.map((question) => (
               <tr key={question.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">{question.title}</div>
@@ -182,9 +192,10 @@ export default function Questions() {
                   </button>
                   <button
                     onClick={() => handleDelete(question.id!)}
-                    className="text-red-600 hover:text-red-900"
+                    disabled={deletingId === question.id}
+                    className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Delete
+                    {deletingId === question.id ? 'Deleting...' : 'Delete'}
                   </button>
                 </td>
               </tr>

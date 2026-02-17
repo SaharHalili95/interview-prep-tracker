@@ -5,6 +5,7 @@ import { Stats } from '../types/Question'
 export default function Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     loadStats()
@@ -12,16 +13,28 @@ export default function Dashboard() {
 
   const loadStats = async () => {
     try {
+      setError(null)
       const data = await api.getStats()
       setStats(data)
-    } catch (error) {
-      console.error('Failed to load stats:', error)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to load statistics'
+      setError(message)
+      console.error('Failed to load stats:', err)
     } finally {
       setLoading(false)
     }
   }
 
   if (loading) return <div className="text-center py-8">Loading...</div>
+
+  if (error) return (
+    <div className="text-center py-8">
+      <p className="text-red-600 mb-4">{error}</p>
+      <button onClick={loadStats} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+        Retry
+      </button>
+    </div>
+  )
 
   return (
     <div className="px-4 py-6">

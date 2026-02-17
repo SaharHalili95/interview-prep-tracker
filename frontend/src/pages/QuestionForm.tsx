@@ -7,6 +7,7 @@ export default function QuestionForm() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(!!id)
   const [formData, setFormData] = useState<Question>({
     title: '',
     description: '',
@@ -33,6 +34,8 @@ export default function QuestionForm() {
       }
     } catch (error) {
       console.error('Failed to load question:', error)
+    } finally {
+      setInitialLoading(false)
     }
   }
 
@@ -65,14 +68,18 @@ export default function QuestionForm() {
         {id ? 'Edit Question' : 'Add New Question'}
       </h1>
 
+      {initialLoading ? (
+        <div className="text-center py-8">Loading question...</div>
+      ) : (
       <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 max-w-2xl">
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
               Title *
             </label>
             <input
               type="text"
+              id="title"
               name="title"
               value={formData.title}
               onChange={handleChange}
@@ -82,10 +89,11 @@ export default function QuestionForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
               Description *
             </label>
             <textarea
+              id="description"
               name="description"
               value={formData.description}
               onChange={handleChange}
@@ -97,10 +105,11 @@ export default function QuestionForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="difficulty" className="block text-sm font-medium text-gray-700 mb-2">
                 Difficulty *
               </label>
               <select
+                id="difficulty"
                 name="difficulty"
                 value={formData.difficulty}
                 onChange={handleChange}
@@ -114,11 +123,12 @@ export default function QuestionForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
                 Category *
               </label>
               <input
                 type="text"
+                id="category"
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
@@ -129,10 +139,11 @@ export default function QuestionForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
                 Status
               </label>
               <select
+                id="status"
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
@@ -146,11 +157,12 @@ export default function QuestionForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="leetcode_url" className="block text-sm font-medium text-gray-700 mb-2">
               LeetCode URL
             </label>
             <input
               type="url"
+              id="leetcode_url"
               name="leetcode_url"
               value={formData.leetcode_url}
               onChange={handleChange}
@@ -160,10 +172,11 @@ export default function QuestionForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="solution" className="block text-sm font-medium text-gray-700 mb-2">
               Solution
             </label>
             <textarea
+              id="solution"
               name="solution"
               value={formData.solution}
               onChange={handleChange}
@@ -173,10 +186,11 @@ export default function QuestionForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
               Notes
             </label>
             <textarea
+              id="notes"
               name="notes"
               value={formData.notes}
               onChange={handleChange}
@@ -203,6 +217,7 @@ export default function QuestionForm() {
           </div>
         </div>
       </form>
+      )}
     </div>
   )
 }
