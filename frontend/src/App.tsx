@@ -2,6 +2,7 @@ import { Routes, Route, Link } from 'react-router-dom'
 import Questions from './pages/Questions'
 import QuestionForm from './pages/QuestionForm'
 import Dashboard from './pages/Dashboard'
+import Practice from './pages/Practice'
 
 function App() {
   return (
@@ -19,6 +20,9 @@ function App() {
               <Link to="/add" className="inline-flex items-center px-1 pt-1 text-gray-500 hover:text-gray-900">
                 Add Question
               </Link>
+              <Link to="/practice" className="inline-flex items-center px-1 pt-1 text-gray-500 hover:text-gray-900">
+                Practice Timer
+              </Link>
             </div>
           </div>
         </div>
@@ -30,6 +34,7 @@ function App() {
           <Route path="/questions" element={<Questions />} />
           <Route path="/add" element={<QuestionForm />} />
           <Route path="/edit/:id" element={<QuestionForm />} />
+          <Route path="/practice" element={<Practice />} />
         </Routes>
       </main>
     </div>
