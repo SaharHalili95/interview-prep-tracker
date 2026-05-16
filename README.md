@@ -1,84 +1,43 @@
 # Interview Prep Tracker
 
-![CI](https://github.com/SaharHalili95/interview-prep-tracker/actions/workflows/ci.yml/badge.svg)
-![Python](https://img.shields.io/badge/python-3.8+-blue.svg)
-![TypeScript](https://img.shields.io/badge/typescript-5.0+-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
+A client-side coding interview preparation tracker built with React and TypeScript. Track questions, monitor progress, and link directly to LeetCode problems - all in the browser with no backend required.
 
-A full-stack application to track coding interview questions and preparation progress.
+**Live demo:** https://saharhalili95.github.io/interview-prep-tracker/
+
+## Features
+
+- Add, edit, and delete interview questions
+- Filter by category, difficulty, and status
+- Direct links to LeetCode problems
+- Dashboard with progress statistics
+- Save solutions and notes per question
+- Sample questions loaded automatically on first use
+- All data persisted in browser localStorage
 
 ## Tech Stack
 
-**Backend:** FastAPI + MongoDB
-**Frontend:** React + TypeScript + Vite + Tailwind CSS
+- React 18 + TypeScript
+- Vite
+- Tailwind CSS
+- localStorage (no backend or database required)
 
-## Prerequisites
-
-- Python 3.8+
-- Node.js 16+
-- MongoDB running locally or MongoDB Atlas
-
-## Installation & Setup
-
-### Backend
+## Local Development
 
 ```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env
-# Edit .env with your MongoDB connection string
-uvicorn main:app --reload
-```
-
-Backend runs on `http://localhost:8000`
-
-### Frontend
-
-```bash
-cd frontend
 npm install
 npm run dev
 ```
 
-Frontend runs on `http://localhost:5173`
+Open `http://localhost:5173` in your browser.
 
-## Usage
-
-1. Start MongoDB
-2. Start the backend server
-3. Start the frontend development server
-4. Open `http://localhost:5173` in your browser
-
-## Features
-
-- Add/Edit/Delete interview questions
-- Filter by category, difficulty, and status
-- Track progress with dashboard statistics
-- Link to LeetCode problems
-- Save solutions and notes
-
-## Docker
-
-Run the entire application with Docker:
+## Build and Deploy
 
 ```bash
-docker-compose up --build
+npm run build
+npm run preview
 ```
 
-This will start:
-- Backend API at `http://localhost:8000`
-- Frontend at `http://localhost:5173`
-- MongoDB at `localhost:27017`
-
-## Testing
-
-```bash
-cd backend
-pip install -r requirements.txt
-pytest tests/ -v
-```
+The app is deployed as a static site on GitHub Pages.
 
 ## License
 
