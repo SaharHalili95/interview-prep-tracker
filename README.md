@@ -30,6 +30,28 @@ npm run dev
 
 Open `http://localhost:5173` in your browser.
 
+## Backend API
+
+`backend/` holds a separate REST API for the same data, built with FastAPI and MongoDB. The hosted demo does not use it: the frontend keeps everything in localStorage.
+
+```
+backend/
+├── main.py                       # App setup and router registration
+├── routes/                       # HTTP layer; __init__.py combines the routers
+│   ├── questions.py              # CRUD on /questions
+│   └── stats.py                  # GET /stats
+├── services/question_service.py  # MongoDB access
+├── errors.py                     # Maps service errors to 400/404
+└── tests/                        # pytest against an in-memory MongoDB (mongomock-motor)
+```
+
+```bash
+cd backend
+pip install -r requirements.txt
+pytest
+MONGODB_URI=mongodb://localhost:27017/interview_prep uvicorn main:app --reload
+```
+
 ## Build and Deploy
 
 ```bash
