@@ -1,117 +1,63 @@
-import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
-from bson import ObjectId
-import sys
-import os
+from tests.conftest import TWO_SUM
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+MISSING_ID = "507f1f77bcf86cd799439011"
 
 
-class TestQuestionHelper:
-    """Tests for question_helper function."""
-
-    def test_question_helper_converts_objectid(self):
-        """Test that question_helper converts ObjectId to string."""
-        # Mock the database module before importing main
-        mock_collection = MagicMock()
-
-        with patch.dict('sys.modules', {'database': MagicMock(questions_collection=mock_collection)}):
-            # Now import main with mocked database
-            from main import question_helper
-
-            test_question = {
-                "_id": ObjectId("507f1f77bcf86cd799439011"),
-                "title": "Test",
-                "description": "Test desc",
-                "difficulty": "Easy",
-                "category": "Array",
-                "status": "Not Started",
-                "leetcode_url": None,
-                "solution": None,
-                "notes": None,
-                "date_solved": None,
-            }
-
-            result = question_helper(test_question)
-
-            assert result["id"] == "507f1f77bcf86cd799439011"
-            assert isinstance(result["id"], str)
-            assert "_id" not in result
-
-    def test_question_helper_handles_optional_fields(self):
-        """Test that question_helper handles missing optional fields."""
-        mock_collection = MagicMock()
-
-        with patch.dict('sys.modules', {'database': MagicMock(questions_collection=mock_collection)}):
-            from main import question_helper
-
-            # Question without optional fields
-            test_question = {
-                "_id": ObjectId("507f1f77bcf86cd799439011"),
-                "title": "Test",
-                "description": "Test desc",
-                "difficulty": "Easy",
-                "category": "Array",
-                "status": "Not Started",
-            }
-
-            result = question_helper(test_question)
-
-            assert result["leetcode_url"] is None
-            assert result["solution"] is None
-            assert result["notes"] is None
-            assert result["date_solved"] is None
+def test_root(client):
+    assert client.get("/").json() == {"message": "Interview Prep Tracker API"}
 
 
-class TestAPIEndpoints:
-    """Tests for API endpoints using TestClient."""
+def test_create_returns_question_with_id_and_defaults(created):
+    assert len(created["id"]) == 24
+    assert created["title"] == "Two Sum"
+    assert created["status"] == "Not Started"
+    assert created["solution"] is None
 
-    @pytest.fixture
-    def client(self):
-        """Create test client with mocked database."""
-        # Create mock for the questions_collection
-        mock_collection = MagicMock()
 
-        # Mock the database module
-        mock_db_module = MagicMock()
-        mock_db_module.questions_collection = mock_collection
+def test_create_requires_title(client):
+    question = {key: value for key, value in TWO_SUM.items() if key != "title"}
 
-        with patch.dict('sys.modules', {'database': mock_db_module}):
-            # Import app after mocking
-            from main import app
-            from fastapi.testclient import TestClient
+    assert client.post("/questions", json=question).status_code == 422
 
-            with TestClient(app) as test_client:
-                yield test_client
 
-    def test_root_endpoint(self, client):
-        """Test that root endpoint returns correct message."""
-        response = client.get("/")
-        assert response.status_code == 200
-        assert response.json() == {"message": "Interview Prep Tracker API"}
+def test_list_returns_created_questions(client, created):
+    assert [question["id"] for question in client.get("/questions").json()] == [created["id"]]
 
-    def test_create_question_missing_fields(self, client):
-        """Test that creating question without required fields returns 422."""
-        response = client.post("/questions", json={})
-        assert response.status_code == 422
 
-    def test_create_question_missing_title(self, client):
-        """Test that creating question without title returns 422."""
-        response = client.post("/questions", json={
-            "description": "Test",
-            "difficulty": "Easy",
-            "category": "Array"
-        })
-        assert response.status_code == 422
+def test_marking_solved_sets_date_solved(client, created):
+    updated = client.put(f"/questions/{created['id']}", json={"status": "Solved"}).json()
 
-    def test_update_question_invalid_id(self, client):
-        """Test that updating with invalid ObjectId returns 400."""
-        response = client.put("/questions/invalid-id", json={"title": "New Title"})
-        assert response.status_code == 400
-        assert "Invalid question ID" in response.json()["detail"]
+    assert updated["status"] == "Solved"
+    assert updated["date_solved"] is not None
 
-    def test_delete_question_invalid_id(self, client):
-        """Test that deleting with invalid ObjectId returns 400."""
-        response = client.delete("/questions/invalid-id")
-        assert response.status_code == 400
-        assert "Invalid question ID" in response.json()["detail"]
+
+def test_update_with_unchanged_values_still_succeeds(client, created):
+    response = client.put(f"/questions/{created['id']}", json={"title": "Two Sum"})
+
+    assert response.status_code == 200
+
+
+def test_update_missing_question_returns_404(client):
+    assert client.put(f"/questions/{MISSING_ID}", json={"title": "x"}).status_code == 404
+
+
+def test_invalid_id_returns_400(client):
+    assert client.put("/questions/not-an-id", json={"title": "x"}).status_code == 400
+    assert client.delete("/questions/not-an-id").status_code == 400
+
+
+def test_delete_removes_question(client, created):
+    assert client.delete(f"/questions/{created['id']}").status_code == 200
+    assert client.delete(f"/questions/{created['id']}").status_code == 404
+    assert client.get("/questions").json() == []
+
+
+def test_stats_group_by_status_category_and_difficulty(client, created):
+    client.put(f"/questions/{created['id']}", json={"status": "Solved"})
+    client.post("/questions", json={**TWO_SUM, "title": "3Sum", "difficulty": "Medium"})
+
+    stats = client.get("/stats").json()
+
+    assert (stats["total"], stats["solved"], stats["not_started"]) == (2, 1, 1)
+    assert stats["by_category"] == [{"category": "Array", "count": 2}]
+    assert sorted(group["difficulty"] for group in stats["by_difficulty"]) == ["Easy", "Medium"]

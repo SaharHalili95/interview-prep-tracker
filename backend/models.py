@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from datetime import datetime
 from enum import Enum
@@ -28,8 +28,8 @@ class Question(BaseModel):
     notes: Optional[str] = None
     date_solved: Optional[datetime] = None
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "title": "Two Sum",
                 "description": "Find two numbers that add up to target",
@@ -39,6 +39,7 @@ class Question(BaseModel):
                 "leetcode_url": "https://leetcode.com/problems/two-sum/",
             }
         }
+    )
 
 
 class QuestionUpdate(BaseModel):
